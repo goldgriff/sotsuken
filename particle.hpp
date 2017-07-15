@@ -3,9 +3,10 @@
 #include<Eigen/Geometry>
 
 
+using namespace Eigen;
+
 class Particle
 {
-    using namespace Eigen;
 
     private:
         Vector2d _position;

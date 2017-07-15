@@ -7,15 +7,15 @@ ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta) 
 Particles ParticleFactory::initializeParticles(int particleNumber)
 {
     std::random_device rand_dev;
-    std::mt19937 mt(rand_dev())
+    std::mt19937 mt(rand_dev());
     std::uniform_real_distribution<double> posMake(0.0,_box_size);
     std::uniform_real_distribution<double> angleMake(0.0,360.0);
 
     Particles particles(particleNumber);
 
-    for(aut itr=particles.begin(); itr != particles.end() ++itr)
+    for(auto itr=particles.begin(); itr != particles.end() ; ++itr)
     {
-        Vector2d pos(posMake(mt),pasMake(mt));
+        Vector2d pos(posMake(mt),posMake(mt));
         double parAng = angleMake(mt);
         double magAng = angleMake(mt);
         std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
@@ -27,15 +27,16 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
 Particles ParticleFactory::moveParticles(Particles const& particles)
 {
     std::random_device rand_dev;
-    std::mt19937 mt(rand_dev())
+    std::mt19937 mt(rand_dev());
     std::uniform_real_distribution<double> diffrMaker(-_delr,_delr);
     std::uniform_real_distribution<double> diffthetaMaker(-_deltheta,_deltheta);
+
     Particles newParticles;
-    for(itr = auto particles.begin(), itr != particle.end(), ++itr)
+    for(auto itr = particles.begin(); itr != particles.end(); ++itr)
     {
         Vector2d diffr(diffrMaker(mt),diffrMaker(mt));
         Vector2d pos = (*itr)->position() + diffr;
-        pos = adjustPostion(pos);
+        pos = adjustPosition(pos);
         double difftheta = diffthetaMaker(mt);
         double parAng = (*itr)->particleAngle() + difftheta;
         parAng = adjustAngle(parAng);
