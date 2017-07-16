@@ -193,4 +193,25 @@ double Energy::calcMagneticEnergyBetweenMagneticField(Particle const & particle,
 
 
 
+double Energy::getEnergy() const
+{
+    return _energy;
+}
+
+double Energy::getStericEnergy() const
+{
+    return _stericEnergy;
+}
+
+double Energy::getMagneticEnergyBetweenParticle() const
+{
+    return _magneticEnergyBetweenParticle;
+}
+
+double getMagneticEnergyBetweenMagneticField() const
+{
+    return _magneticEnergyBetweenMagneticField;
+}
+
+
 

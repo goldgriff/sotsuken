@@ -60,4 +60,9 @@ class Energy
         double calcMagneticEnergyBetweenPortion(Eigen::Vector2d const &p1, Eigen::Vector2d const & p2, double  const &angle1, double const &angle2, double paramaterLambda);
 
         double calcMagneticEnergyBetweenMagneticField(Particle const & particle, double xi);
+        
+        double getEnergy() const;
+        double getStericEnergy() const;
+        double getMagneticEnergyBetweenParticle() const;
+        double getMagneticEnergyBetweenMagneticField  const;
 };
