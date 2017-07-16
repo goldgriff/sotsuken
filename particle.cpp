@@ -10,22 +10,22 @@ Particle::Particle(Vector2d pos, double parAng, double magAng,double circleRadiu
     _circleRadius = circleRadius;
 }
 
-Vector2d Particle::position()
+Vector2d Particle::position() const
 {
     return _position;
 }
 
-double Particle::particleAngle()
+double Particle::particleAngle() const
 {
     return _particleAngle;
 }
 
-double Particle::magnetizationAngle()
+double Particle::magnetizationAngle() const
 {
     return _magnetizationAngle;
 }
 
-double Particle::circleRadius()
+double Particle::circleRadius() const
 {
     return _circleRadius;
 }

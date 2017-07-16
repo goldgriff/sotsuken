@@ -51,7 +51,7 @@ class Energy
         
 
         double calcStericEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2);
-        double calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2, double paramaterLambda);
+        double calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2,double box_size, double paramaterLambda);
 
         //first: distance
         //second: p2nohou flag(0:+0 1:+(box,0) 2:+(0,box) 3:+ (box,box) 4:-1 5:-2 6:-3

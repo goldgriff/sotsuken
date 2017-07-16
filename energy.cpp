@@ -1,7 +1,8 @@
 #include <math.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include "Particle.hpp"
+#include "energy.hpp"
+#include "particle.hpp"
 
 #define PI 3.14159265
 using namespace Eigen;
@@ -37,6 +38,25 @@ ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
 
 
 
+//first: distance
+//second: p2nohou flag(0:+0 1:+(box,0) 2:+(0,box) 3:+ (box,box) 4:-1 5:-2 6:-3
+std::pair<double,int> Energy::minimumDistance( Eigen::Vector2d p1, Eigen::Vector2d p2, double box_size)
+{
+    std::array<double,7> distanceArray;
+    Eigen::Vector2d x(box_size,0);
+    Eigen::Vector2d y(0,box_size);
+    Eigen::Vector2d xy(box_size,box_size);
+    distanceArray[0] = (p1-p2).norm();
+    distanceArray[1] = (p1-p2-x).norm();
+    distanceArray[2] = (p1-p2-y).norm();
+    distanceArray[3] = (p1-p2-xy).norm();
+    distanceArray[4] = (p1-p2+x).norm();
+    distanceArray[5] = (p1-p2+y).norm();
+    distanceArray[6] = (p1-p2+xy).norm();
+    auto minItr = std::min_element(distanceArray.begin(), distanceArray.end());
+    int index = static_cast<int>(std::distance(distanceArray.begin(),minItr));
+    return std::make_pair(*minItr,index);
+}
 
 
 
@@ -49,7 +69,7 @@ Energy::Energy(Particles particles, double stericEnergyCutOff,double magneticEne
     //ParticleForCalc make
     std::vector<std::unique_ptr<ParticleForCalc>> setOfParticleForCalc;
 
-    for( auto itr = particles.begin(), itr != particles.end(), ++itr)
+    for( auto itr = particles.begin(); itr != particles.end(); ++itr)
     {
         std::unique_ptr<ParticleForCalc> tempPtr(new ParticleForCalc(*itr));
         setOfParticleForCalc.push_back(move(tempPtr));
@@ -58,18 +78,18 @@ Energy::Energy(Particles particles, double stericEnergyCutOff,double magneticEne
     // caluculate with ParticleForCalc
     for( auto itr = setOfParticleForCalc.begin(); itr != setOfParticleForCalc.end(); ++itr)
     {
-        Vector2d pos1 = *itr->positions[6];
+        Vector2d pos1 = (*itr)->positions[6];
         for( auto itr2 = itr+1; itr2 != setOfParticleForCalc.end(); ++itr2)
         {
-            Vector2d pos2 = *itr2->positions[6];
-            double distance = (minimumDistance(pos1,pos2)).first;
+            Vector2d pos2 = (*itr2)->positions[6];
+            double distance = (minimumDistance(pos1,pos2,box_size)).first;
             if(distance < stericEnergyCutOff) stericEnergy += calcStericEnergy(*(*itr),*(*itr2));
-            if(distance < magneticEnergyCutOff) magneticEnergyBetweenParticle += calcMagneticEnergy(*(*itr),*(*itr2),  paramaterLambda);
+            if(distance < magneticEnergyCutOff) magneticEnergyBetweenParticle += calcMagneticEnergy(*(*itr),*(*itr2),box_size ,  paramaterLambda);
         }
     }
 
     //jiba
-    for (auto itr = particles.begin(), itr != particles.end(), ++itr)
+    for (auto itr = particles.begin(); itr != particles.end(); ++itr)
     {
         magneticEnergyBetweenMagneticField += calcMagneticEnergyBetweenMagneticField(*(*itr),  xi);
     }
@@ -93,7 +113,7 @@ double Energy::calcStericEnergy(ParticleForCalc const &p1, ParticleForCalc const
 
 
 
-double Energy::calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc const &_p2, double paramaterLambda)
+double Energy::calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc const &_p2, double box_size, double paramaterLambda)
 {
     Eigen::Vector2d x(box_size,0);
     Eigen::Vector2d y(0,box_size);
@@ -101,7 +121,7 @@ double Energy::calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc con
     Eigen::Vector2d addVector(0,0);
 
     ParticleForCalc p2 = _p2;
-    int distFlag = ( minimumDistance(p1.positions[6],p2.positions[6])).second;
+    int distFlag = ( minimumDistance(p1.positions[6],p2.positions[6], box_size)).second;
 
     switch (distFlag)
     {
@@ -150,7 +170,7 @@ double Energy::calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc con
 double Energy::calcMagneticEnergyBetweenPortion(Eigen::Vector2d const &p1, Eigen::Vector2d const & p2, double  const &angle1, double const &angle2, double paramaterLambda)
 {
     Eigen::Vector2d rVec = p1-p2;
-    Eigen::Vector2d t = rVec.normalize(); 
+    Eigen::Vector2d t = rVec.normalized(); 
     double r = rVec.norm();
     double radAngle1 = angle1 / 180.0 * PI;
     double radAngle2 = angle2 / 180.0 * PI;
@@ -169,22 +189,8 @@ double Energy::calcMagneticEnergyBetweenMagneticField(Particle const & particle,
     return -sin(radAngle) * xi * 7;
 }
 
-//first: distance
-//second: p2nohou flag(0:+0 1:+(box,0) 2:+(0,box) 3:+ (box,box) 4:-1 5:-2 6:-3
-std::pair<double,int> minimumDistance( Eigen::Vector2d p1, Eigen::Vector2d p2, double box_size)
-{
-    std::array<double,7> distanceArray;
-    Eigen::Vector2d x(box_size,0);
-    Eigen::Vector2d y(0,box_size);
-    Eigen::Vector2d xy(box_size,box_size);
-    distanceArray[0] = (p1-p2).norm();
-    distanceArray[1] = (p1-p2-x).norm();
-    distanceArray[2] = (p1-p2-y).norm();
-    distanceArray[3] = (p1-p2-xy).norm();
-    distanceArray[4] = (p1-p2+x).norm();
-    distanceArray[5] = (p1-p2+y).norm();
-    distanceArray[6] = (p1-p2+xy).norm();
-    auto minItr = std::min_element(distanceArray.begin(), distanceArray.end());
-    int index = static_cast<int>(std::distance(distanceArray.begin(),minItr));
-    return std::make_pair(*minItr,index);
-}
+
+
+
+
+

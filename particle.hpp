@@ -15,8 +15,8 @@ class Particle
         double _circleRadius;
     public:
         Particle(Vector2d pos, double parAng, double magAng, double circleRadius);
-        Vector2d position();
-        double particleAngle();
-        double magnetizationAngle();
-        double circleRadius();
+        Vector2d position() const;
+        double particleAngle() const;
+        double magnetizationAngle() const;
+        double circleRadius() const;
 };
