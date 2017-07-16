@@ -60,7 +60,7 @@ std::pair<double,int> Energy::minimumDistance( Eigen::Vector2d p1, Eigen::Vector
 
 
 
-Energy::Energy(Particles particles, double stericEnergyCutOff,double magneticEnergyCutOff,double box_size, double xi, double paramaterLambda)
+Energy::Energy(Particles const &particles, double stericEnergyCutOff,double magneticEnergyCutOff,double box_size, double xi, double paramaterLambda)
 {
     double stericEnergy = 0;
     double magneticEnergyBetweenParticle = 0;
@@ -208,10 +208,7 @@ double Energy::getMagneticEnergyBetweenParticle() const
     return _magneticEnergyBetweenParticle;
 }
 
-double getMagneticEnergyBetweenMagneticField() const
+double Energy::getMagneticEnergyBetweenMagneticField() const
 {
     return _magneticEnergyBetweenMagneticField;
 }
-
-
-

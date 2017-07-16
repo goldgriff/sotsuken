@@ -47,7 +47,7 @@ class Energy
             _magneticEnergyBetweenMagneticField = magneticEnergyBetweenMagneticField;
             _energy = stericEnergy + magneticEnergyBetweenMagneticField + magneticEnergyBetweenParticle;
         }
-        Energy(Particles particles, double stericEnergyCutOff,double magneticEnergyCutOff,double box_size, double xi, double paramaterLambda);
+        Energy(Particles const &particles, double stericEnergyCutOff,double magneticEnergyCutOff,double box_size, double xi, double paramaterLambda);
         
 
         double calcStericEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2);
@@ -64,5 +64,5 @@ class Energy
         double getEnergy() const;
         double getStericEnergy() const;
         double getMagneticEnergyBetweenParticle() const;
-        double getMagneticEnergyBetweenMagneticField  const;
+        double getMagneticEnergyBetweenMagneticField()  const;
 };
