@@ -1,7 +1,7 @@
 #include <random>
 #include "particleFactory.hpp"
 
-ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta) : _box_size(box_size), _delr(delr), _deltheta(deltheta){
+ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta, double circleRadius) : _box_size(box_size), _delr(delr), _deltheta(deltheta), _circleRadius(circleRadius) {
 }
 
 Particles ParticleFactory::initializeParticles(int particleNumber)
@@ -18,7 +18,7 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
         Vector2d pos(posMake(mt),posMake(mt));
         double parAng = angleMake(mt);
         double magAng = angleMake(mt);
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng,_circleRadius));
         *itr = std::move(ptr);
     }
     return particles;
@@ -41,7 +41,7 @@ Particles ParticleFactory::moveParticles(Particles const& particles)
         double parAng = (*itr)->particleAngle() + difftheta;
         parAng = adjustAngle(parAng);
         double magAng = (*itr)->magnetizationAngle();
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
         newParticles.push_back(std::move(ptr));
     }
     return newParticles;

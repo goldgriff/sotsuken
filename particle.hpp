@@ -12,9 +12,11 @@ class Particle
         Vector2d _position;
         double _particleAngle;
         double _magnetizationAngle;
+        double _circleRadius;
     public:
-        Particle(Vector2d pos, double parAng, double magAng);
+        Particle(Vector2d pos, double parAng, double magAng, double circleRadius);
         Vector2d position();
         double particleAngle();
         double magnetizationAngle();
+        double circleRadius();
 };
