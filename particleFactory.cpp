@@ -47,6 +47,28 @@ Particles ParticleFactory::moveParticles(Particles const& particles)
     return newParticles;
 }
 
+Particles ParticleFactory::moveOneParticles(Particles const& particles, int const& index)
+{
+    std::random_device rand_dev;
+    std::mt19937 mt(rand_dev());
+    std::uniform_real_distribution<double> diffrMaker(-_delr,_delr);
+    std::uniform_real_distribution<double> diffthetaMaker(-_deltheta,_deltheta);
+
+    Particles newParticles = copyParticles(particles);
+
+    Vector2d diffr(diffrMaker(mt),diffrMaker(mt));
+    Vector2d pos = particles[index]->position() + diffr;
+    pos = adjustPosition(pos);
+    double difftheta = diffthetaMaker(mt);
+    double parAng = particles[index]->particleAngle() + difftheta;
+    parAng = adjustAngle(parAng);
+    double magAng = particles[index]->magnetizationAngle();
+    std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
+    newParticles[index] = std::move(ptr);
+
+    return newParticles;
+}
+
 
 
 

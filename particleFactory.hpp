@@ -21,6 +21,7 @@ class ParticleFactory
         ParticleFactory(double box_size, double delr, double deltheta, double circleRadius);
         Particles initializeParticles(int particleNumber);
         Particles moveParticles(Particles const& particles);
+        Particles moveOneParticles(Particles const& particles,int const& index);
         Particles copyParticles(Particles const& particles);
         Vector2d adjustPosition(Vector2d original_position);
         double adjustAngle(double original_angle);
