@@ -6,13 +6,14 @@
 
 class Particle;
 
-using Particles = std::vector<std::unique_ptr<Particle>>;
+using Particles = std::vector<std::shared_ptr<Particle>>;
+using Particleptr = std::shared_ptr<Particle>;
 using Positions = std::array<Eigen::Vector2d,7>;
 
 class ParticleForCalc
 {
     public:
-        ParticleForCalc(const std::unique_ptr<Particle> &particle);
+        ParticleForCalc(const Particleptr &particle);
 
         /*
          *        1

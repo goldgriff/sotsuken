@@ -77,7 +77,7 @@ int main()
     double delr = 0.5;
     double deltheta = 10;
     double magnetCutoff = 8;
-    double xi = 0;
+    double xi = 20;
     double lambdap = 7;
 
 
@@ -118,7 +118,8 @@ int main()
         if(energy.getEnergy() > tmpenergy.getEnergy())
         {
             energy = tmpenergy;
-            particles = pf->copyParticles(tmpparticles);
+			particles = tmpparticles;
+            //particles = pf->copyParticles(tmpparticles);
         } else 
         {
             double probab = exp(-(tmpenergy.getEnergy() - energy.getEnergy()));
@@ -126,7 +127,8 @@ int main()
             if(probab > randprob)
             {
                 energy = tmpenergy;
-                particles = pf->copyParticles(tmpparticles);
+				particles = tmpparticles;
+                //particles = pf->copyParticles(tmpparticles);
             }
         }
         //op->outputParticles(filename,particles);

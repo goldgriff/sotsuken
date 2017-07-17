@@ -6,7 +6,8 @@
 #include <Eigen/Geometry>
 #include "particle.hpp"
 
-using Particles = std::vector<std::unique_ptr<Particle>>;
+using Particles = std::vector<std::shared_ptr<Particle>>;
+using Particleptr = std::shared_ptr<Particle>;
 using namespace Eigen;
 
 class ParticleFactory

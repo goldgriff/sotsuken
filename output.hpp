@@ -7,7 +7,7 @@
 class Particle;
 class Energy;
 
-using Particles = std::vector<std::unique_ptr<Particle>>;
+using Particles = std::vector<std::shared_ptr<Particle>>;
 
 
 class Output

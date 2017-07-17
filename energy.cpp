@@ -11,7 +11,7 @@ using namespace Eigen;
 
 
 
-ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
+ParticleForCalc::ParticleForCalc(const Particleptr &particle)
 {
     double cr = particle -> circleRadius();
     double pa = particle -> particleAngle();
