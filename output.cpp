@@ -25,7 +25,7 @@ void Output::outputParticles(std::string const & filename, Particles const & par
 
 void Output::outputEnergy(std::string const & filename, int const & count, Energy const & energy)
 {
-    ofstream ofs(filename,std::app);
+    ofstream ofs(filename,std::ios::app);
     ofs << count << ",";
     ofs << energy.getEnergy() << ",";
     ofs << energy.getStericEnergy() << ",";

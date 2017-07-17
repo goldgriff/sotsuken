@@ -16,7 +16,7 @@ class Output
         int outputCount = 0;
     public:
         void outputParticles(std::string const & filename, Particles const & particles);
-        void outputEnergy(std::string const & filename, Energy const & energy);
+        void outputEnergy(std::string const & filename,int const& count, Energy const & energy);
 
         void outputEnergyInitialize(std::string const & filename);
 

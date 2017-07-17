@@ -2,6 +2,8 @@
 #include <sys/types.h>
 #include<iostream>
 #include<string>
+#include <iomanip> //時間を取得するため
+#include <sstream> //値を簡単に文字列にするため
 #include<math.h>
 #include <memory>
 #include <random>
@@ -38,21 +40,30 @@ struct __bench__ {
 
 int main()
 {
-	
-	//時刻取得用
-	char buff[] = "";
+ 
+	//現在日時を取得する
+	time_t t = time(nullptr);
+	 
+	//形式を変換する    
+	const tm* lt = localtime(&t);
+	 
+	//sに独自フォーマットになるように連結していく
+	std::stringstream s;
+	s<<"20";
+	s<<lt->tm_year-100; //100を引くことで20xxのxxの部分になる
+	s<<"-";
+	s<<lt->tm_mon+1; //月を0からカウントしているため
+	s<<"-";
+	s<<lt->tm_mday; //そのまま
+	s<<lt->tm_hour;
+	s<<lt->tm_min;
+	s<<lt->tm_sec;
+	 
+	//result = "2015-5-19" 
+	std::string result = s.str();
+ 
 
-	//現在時刻取得
-	time_t now = time(NULL);
-	struct tm *pnow = localtime(&now);
-	sprintf(buff, "%04d%02d%02d%02d%02d%02d", pnow->tm_year + 1900, pnow->tm_mon + 1, pnow->tm_mday,
-		pnow->tm_hour, pnow->tm_min, pnow->tm_sec);
-		
-	//表示
-	std::cout << buff << std::endl;
-	string bf(buff);
-
-    string directoryname = "outputdata/"+bf;
+    string directoryname = "outputdata/"+result;
 	struct stat st;
     if(stat(directoryname.c_str(), &st) != 0){
          mkdir(directoryname.c_str(), 0777);
@@ -67,7 +78,7 @@ int main()
     double deltheta = 10;
     double magnetCutoff = 8;
     double xi = 0;
-	double lambdap = 7;
+    double lambdap = 7;
 
 
     ParticleFactory *pf = new ParticleFactory(box_size,delr,deltheta, circleRadius);
@@ -80,8 +91,8 @@ int main()
 
 
 
-    string particlefilename = directoryname + "particle" + to_string(0) +   ".csv";
-    string energyfilename = directoryname + "energy" +   ".csv";
+    string particlefilename = directoryname + "/particle" + to_string(0) +   ".csv";
+    string energyfilename = directoryname + "/energy" +   ".csv";
     op->outputParticles(particlefilename,particles);
     op->outputEnergyInitialize(energyfilename);
     op->outputEnergy(energyfilename,0,energy);
@@ -90,11 +101,12 @@ int main()
     random_device rd;
     mt19937 mt(rd());
     uniform_real_distribution<double> randomprobgenerator(0.0,1.0);
+    cout << "ok" << endl;
     for(int i=1;i<=50000;i++)
     {
         if( i% 1000 == 0)
         {
-            particlefilename = directoryname + "particle" + to_string(i)+".csv";
+            particlefilename = directoryname + "/particle" + to_string(i)+".csv";
             op->outputParticles(particlefilename,particles);
             op->outputEnergy(energyfilename,i,energy);
         }
