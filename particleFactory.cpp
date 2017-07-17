@@ -47,6 +47,26 @@ Particles ParticleFactory::moveParticles(Particles const& particles)
     return newParticles;
 }
 
+
+
+
+
+Particles ParticleFactory::copyParticles(Particles const& particles)
+{
+    Particles newParticles;
+    for(auto itr = particles.begin(); itr != particles.end(); ++itr)
+    {
+        Vector2d pos = (*itr)->position() ;
+        double parAng = (*itr)->particleAngle() ;
+        double magAng = (*itr)->magnetizationAngle();
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
+        newParticles.push_back(std::move(ptr));
+    }
+    return newParticles;
+}
+
+
+
 Vector2d ParticleFactory::adjustPosition(Vector2d original_position)
 {
     double x,y,o_x=original_position[0],o_y=original_position[1];

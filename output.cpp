@@ -23,13 +23,19 @@ void Output::outputParticles(std::string const & filename, Particles const & par
 }
 
 
-void Output::outputEnergy(std::string const & filename, Energy const & energy)
+void Output::outputEnergy(std::string const & filename, int const & count, Energy const & energy)
 {
-    ofstream ofs(filename);
-    ofs << "energy,stericEnergy,magneticEnergyBetweenParticle,magneticEnergyBetweenMagneticField" << endl;
+    ofstream ofs(filename,std::app);
+    ofs << count << ",";
     ofs << energy.getEnergy() << ",";
     ofs << energy.getStericEnergy() << ",";
     ofs << energy.getMagneticEnergyBetweenParticle() << ",";
     ofs << energy.getMagneticEnergyBetweenMagneticField() << endl;
+}
+
+void Output::outputEnergyInitialize(std::string const & filename)
+{
+    ofstream ofs(filename);
+    ofs << "count,energy,stericEnergy,magneticEnergyBetweenParticle,magneticEnergyBetweenMagneticField" << endl;
 }
 

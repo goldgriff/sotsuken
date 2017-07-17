@@ -18,4 +18,6 @@ class Output
         void outputParticles(std::string const & filename, Particles const & particles);
         void outputEnergy(std::string const & filename, Energy const & energy);
 
+        void outputEnergyInitialize(std::string const & filename);
+
 };
