@@ -13,7 +13,7 @@ int main()
     double delr = 0.3;
     double deltheta = 5.0;
     ParticleFactory *pf = new ParticleFactory(box_size,delr,deltheta, circleRadius);
-    auto a = pf->initializeParticles(10);
+    auto a = pf->initializeParticles(108);
     int i = 1;
     for(auto itr=a.begin(); itr != a.end(); ++itr)
     {
@@ -22,16 +22,10 @@ int main()
         ++i;
     }
 
-    for(i=0;i<30;i++)
+    for(i=0;i<30000;i++)
     {
+        if(i % 1000 == 0) cout << i << endl;
         a = pf->moveParticles(a);
-        int j = 1;
-        for(auto itr=a.begin(); itr != a.end(); ++itr)
-        {
-            cout << "position" << j << endl;
-            cout << (*itr)->position() << endl << endl ;
-            ++j;
-        }
     }
 
     delete pf;

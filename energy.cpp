@@ -1,4 +1,5 @@
 #include <math.h>
+#include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include "energy.hpp"
@@ -6,6 +7,8 @@
 
 #define PI 3.14159265
 using namespace Eigen;
+
+
 
 
 ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
@@ -69,22 +72,33 @@ Energy::Energy(Particles const &particles, double stericEnergyCutOff,double magn
     //ParticleForCalc make
     std::vector<std::unique_ptr<ParticleForCalc>> setOfParticleForCalc;
 
+	
     for( auto itr = particles.begin(); itr != particles.end(); ++itr)
     {
         std::unique_ptr<ParticleForCalc> tempPtr(new ParticleForCalc(*itr));
         setOfParticleForCalc.push_back(move(tempPtr));
     }
-
+     
     // caluculate with ParticleForCalc
+
+
     for( auto itr = setOfParticleForCalc.begin(); itr != setOfParticleForCalc.end(); ++itr)
     {
         Vector2d pos1 = (*itr)->positions[6];
+
         for( auto itr2 = itr+1; itr2 != setOfParticleForCalc.end(); ++itr2)
         {
             Vector2d pos2 = (*itr2)->positions[6];
-            double distance = (minimumDistance(pos1,pos2,box_size)).first;
-            if(distance < stericEnergyCutOff) stericEnergy += calcStericEnergy(*(*itr),*(*itr2));
-            if(distance < magneticEnergyCutOff) magneticEnergyBetweenParticle += calcMagneticEnergy(*(*itr),*(*itr2),box_size ,  paramaterLambda);
+            double distanceBetweenParticle = (minimumDistance(pos1,pos2,box_size)).first;
+
+            
+
+
+            if(distanceBetweenParticle < stericEnergyCutOff) stericEnergy += calcStericEnergy(*(*itr),*(*itr2));
+            if(distanceBetweenParticle < magneticEnergyCutOff)
+            {
+                magneticEnergyBetweenParticle += calcMagneticEnergy(*(*itr),*(*itr2),box_size ,  paramaterLambda);
+            }
         }
     }
 
@@ -153,7 +167,7 @@ double Energy::calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc con
     }
 
     double energy = 0;
-
+    
     for(auto itr = p1.positions.begin(); itr != p1.positions.end(); ++itr)
     {
         for(auto itr2 = p2.positions.begin(); itr2 != p2.positions.end(); ++itr2)
