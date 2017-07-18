@@ -13,7 +13,6 @@ using namespace Eigen;
 
 ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
 {
-    double cr = particle -> circleRadius();
     double pa = particle -> particleAngle();
     double ma = particle -> magnetizationAngle();
     auto pos = particle -> position();
@@ -27,12 +26,12 @@ ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
 
     particleAngle = pa;
     magnetizationAngle = ma;
-    positions[0] = pos + addVector1 * 4 * cr; 
-    positions[1] = pos + addVector2 * 4 * cr;
-    positions[2] = pos + addVector3 * 4 * cr;
-    positions[3] = pos + addVector1 * 2 * cr;
-    positions[4] = pos + addVector2 * 2 * cr;
-    positions[5] = pos + addVector3 * 2 * cr;
+    positions[0] = pos + addVector1 * 4 ; 
+    positions[1] = pos + addVector2 * 4 ;
+    positions[2] = pos + addVector3 * 4 ;
+    positions[3] = pos + addVector1 * 2 ;
+    positions[4] = pos + addVector2 * 2 ;
+    positions[5] = pos + addVector3 * 2 ;
     positions[6] = particle -> position();
 }
 

@@ -16,9 +16,8 @@ class ParticleFactory
         const double _box_size;
         const double _delr;
         const double _deltheta;
-        const double _circleRadius;
     public:
-        ParticleFactory(double box_size, double delr, double deltheta, double circleRadius);
+        ParticleFactory(double box_size, double delr, double deltheta);
         Particles initializeParticles(int particleNumber);
         Particles moveParticles(Particles const& particles);
         Particles moveOneParticles(Particles const& particles,int const& index);

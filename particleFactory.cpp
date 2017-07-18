@@ -1,7 +1,7 @@
 #include <random>
 #include "particleFactory.hpp"
 
-ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta, double circleRadius) : _box_size(box_size), _delr(delr), _deltheta(deltheta), _circleRadius(circleRadius) {
+ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta) : _box_size(box_size), _delr(delr), _deltheta(deltheta) {
 }
 
 Particles ParticleFactory::initializeParticles(int particleNumber)
@@ -18,7 +18,7 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
         Vector2d pos(posMake(mt),posMake(mt));
         double parAng = angleMake(mt);
         double magAng = angleMake(mt);
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng,_circleRadius));
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
         *itr = std::move(ptr);
     }
     return particles;
@@ -41,7 +41,7 @@ Particles ParticleFactory::moveParticles(Particles const& particles)
         double parAng = (*itr)->particleAngle() + difftheta;
         parAng = adjustAngle(parAng);
         double magAng = (*itr)->magnetizationAngle();
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
         newParticles.push_back(std::move(ptr));
     }
     return newParticles;
@@ -63,7 +63,7 @@ Particles ParticleFactory::moveOneParticles(Particles const& particles, int cons
     double parAng = particles[index]->particleAngle() + difftheta;
     parAng = adjustAngle(parAng);
     double magAng = particles[index]->magnetizationAngle();
-    std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
+    std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
     newParticles[index] = std::move(ptr);
 
     return newParticles;
@@ -81,7 +81,7 @@ Particles ParticleFactory::copyParticles(Particles const& particles)
         Vector2d pos = (*itr)->position() ;
         double parAng = (*itr)->particleAngle() ;
         double magAng = (*itr)->magnetizationAngle();
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng, _circleRadius));
+        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
         newParticles.push_back(std::move(ptr));
     }
     return newParticles;

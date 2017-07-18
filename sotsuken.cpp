@@ -72,7 +72,6 @@ int main()
 	
     Output *op = new Output();
 
-    double circleRadius = 0.5;
     double box_size = 30;
     double delr = 0.5;
     double deltheta = 10;
@@ -81,7 +80,7 @@ int main()
     double lambdap = 7;
 
 
-    ParticleFactory *pf = new ParticleFactory(box_size,delr,deltheta, circleRadius);
+    ParticleFactory *pf = new ParticleFactory(box_size,delr,deltheta);
 
 
     auto particles = pf->initializeParticles(64);

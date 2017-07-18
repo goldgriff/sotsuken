@@ -2,12 +2,11 @@
 
 using namespace Eigen;
 
-Particle::Particle(Vector2d pos, double parAng, double magAng,double circleRadius)
+Particle::Particle(Vector2d pos, double parAng, double magAng)
 {
     _position = pos;
     _particleAngle = parAng;
     _magnetizationAngle = magAng;
-    _circleRadius = circleRadius;
 }
 
 Vector2d Particle::position() const
@@ -23,10 +22,5 @@ double Particle::particleAngle() const
 double Particle::magnetizationAngle() const
 {
     return _magnetizationAngle;
-}
-
-double Particle::circleRadius() const
-{
-    return _circleRadius;
 }
 
