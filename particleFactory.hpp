@@ -1,12 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <array>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include "particle.hpp"
 
-using Particles = std::vector<std::unique_ptr<Particle>>;
+using Particles = std::array<std::unique_ptr<Particle>>;
 using namespace Eigen;
 
 class ParticleFactory
@@ -19,9 +19,7 @@ class ParticleFactory
     public:
         ParticleFactory(double box_size, double delr, double deltheta);
         Particles initializeParticles(int particleNumber);
-        Particles moveParticles(Particles const& particles);
-        Particles moveOneParticles(Particles const& particles,int const& index);
-        Particles copyParticles(Particles const& particles);
+        Particle moveParticle(Particle const& particle);
         Vector2d adjustPosition(Vector2d original_position);
         double adjustAngle(double original_angle);
 };

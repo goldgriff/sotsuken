@@ -13,78 +13,34 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
 
     Particles particles(particleNumber);
 
-    for(auto itr=particles.begin(); itr != particles.end() ; ++itr)
+    for(auto &ref: particles)
     {
         Vector2d pos(posMake(mt),posMake(mt));
         double parAng = angleMake(mt);
         double magAng = angleMake(mt);
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
-        *itr = std::move(ptr);
+        ref = unique_ptr<Particle(pos,parAng,magAng)>(new Particle(pos,parAng,magAng));
     }
     return particles;
 }
 
-Particles ParticleFactory::moveParticles(Particles const& particles)
+
+
+Particle ParticleFactory::moveParticle(Particle const& particle)
 {
     std::random_device rand_dev;
     std::mt19937 mt(rand_dev());
     std::uniform_real_distribution<double> diffrMaker(-_delr,_delr);
     std::uniform_real_distribution<double> diffthetaMaker(-_deltheta,_deltheta);
 
-    Particles newParticles;
-    for(auto itr = particles.begin(); itr != particles.end(); ++itr)
-    {
-        Vector2d diffr(diffrMaker(mt),diffrMaker(mt));
-        Vector2d pos = (*itr)->position() + diffr;
-        pos = adjustPosition(pos);
-        double difftheta = diffthetaMaker(mt);
-        double parAng = (*itr)->particleAngle() + difftheta;
-        parAng = adjustAngle(parAng);
-        double magAng = (*itr)->magnetizationAngle();
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
-        newParticles.push_back(std::move(ptr));
-    }
-    return newParticles;
-}
-
-Particles ParticleFactory::moveOneParticles(Particles const& particles, int const& index)
-{
-    std::random_device rand_dev;
-    std::mt19937 mt(rand_dev());
-    std::uniform_real_distribution<double> diffrMaker(-_delr,_delr);
-    std::uniform_real_distribution<double> diffthetaMaker(-_deltheta,_deltheta);
-
-    Particles newParticles = copyParticles(particles);
 
     Vector2d diffr(diffrMaker(mt),diffrMaker(mt));
-    Vector2d pos = particles[index]->position() + diffr;
+    Vector2d pos = particle.position + diffr;
     pos = adjustPosition(pos);
     double difftheta = diffthetaMaker(mt);
-    double parAng = particles[index]->particleAngle() + difftheta;
+    double parAng = particle.particleAngle + difftheta;
     parAng = adjustAngle(parAng);
-    double magAng = particles[index]->magnetizationAngle();
-    std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
-    newParticles[index] = std::move(ptr);
-
-    return newParticles;
-}
-
-
-
-
-
-Particles ParticleFactory::copyParticles(Particles const& particles)
-{
-    Particles newParticles;
-    for(auto itr = particles.begin(); itr != particles.end(); ++itr)
-    {
-        Vector2d pos = (*itr)->position() ;
-        double parAng = (*itr)->particleAngle() ;
-        double magAng = (*itr)->magnetizationAngle();
-        std::unique_ptr<Particle> ptr(new Particle(pos,parAng,magAng));
-        newParticles.push_back(std::move(ptr));
-    }
-    return newParticles;
+    double magAng = particle.magnetizationAngle;
+    return Particle(pos,parAng,magAng);
 }
 
 
