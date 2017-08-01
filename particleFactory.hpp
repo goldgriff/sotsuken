@@ -6,6 +6,8 @@
 #include <Eigen/Geometry>
 #include "particle.hpp"
 
+
+using ptrParticle = std::unique_ptr<Particle>
 using Particles = std::array<std::unique_ptr<Particle>>;
 using namespace Eigen;
 
@@ -19,7 +21,7 @@ class ParticleFactory
     public:
         ParticleFactory(double box_size, double delr, double deltheta);
         Particles initializeParticles(int particleNumber);
-        Particle moveParticle(Particle const& particle);
+        ptrParticle moveParticle(Particle const& particle);
         Vector2d adjustPosition(Vector2d original_position);
         double adjustAngle(double original_angle);
 };

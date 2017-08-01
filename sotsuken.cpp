@@ -13,6 +13,7 @@
 #include "output.hpp"
 
 using namespace std;
+using ptrParticle = unique_ptr<Particle>
 
 /////////////////////////////////
 #include <sys/time.h>
@@ -86,7 +87,11 @@ int main()
     auto particles = pf->initializeParticles(64);
 
 
-    Energy energy(particles,0,magnetCutoff,box_size,xi,lambdap);
+    Energy energyCalc(particles,0,magnetCutoff,box_size,xi,lambdap);
+
+    array<double,particles.size()> energies;
+    array<array<double,particles.size()>,particles.size()> magneticEnergies;
+    array<array<double,particles.size()>,particles.size()> stericEnergies;
 
 
 
@@ -108,6 +113,43 @@ int main()
             particlefilename = directoryname + "/particle" + to_string(i)+".csv";
             op->outputParticles(particlefilename,particles);
             op->outputEnergy(energyfilename,i,energy);
+        }
+
+
+        for(int j = 0; j < particles.size(); j++)
+        {
+            ptrParticle movedParticle = pf.moveParticle(*particles[j]);
+            if(isOverlap(particles,tmpParticle,j)) break;
+            array<double,particles.size()> movedMagneticEnergyArray;
+            array<double,particles.size()> movedStericEnergyArray;
+            for(int k=0; k < particles.size(); k++)
+            {
+                if(j == k)
+                {
+                    movedMagneticEnergyArray[j] = energyCalc.calcMagneticEnergyBetweenMagneticField(*movedParticle,xi);
+                    movedStericEnergyArray[j] = 0;
+                    continue;
+                }
+
+                movedMagneticEnergyArray[k] = energyCalc.calcMagneticEnergyBetweenOtherParticle(*movedParticle,*particles[k],lambdap);
+                movedStericEnergyArray[k] = energyCalc.calcStericEnergy2(*movedParticle,*particles[k]);
+
+            }
+            double movedEnergy = std::accumulate(movedMagneticEnergyArray.begin(),movedMagneticEnergyArray.end(), 0) + std::accumulate(movedStericEnergyArray.begin(),movedStericEnergyArray.end(),0);
+            
+            double diffEnergy = movedEnergy - energies[j];
+            double probab = exp(-diffEnergy);
+            double randprob = randomprobgenerator(mt);
+            if (probab < randprob) break;
+            //koushin
+            for(int k=0; k< particles.size(); ++k) energies[k] += 
+            magneticEnergies[j] = movedMagneticEnergyArray;
+            for(int k = 0; k < magneticEnergies.size(); ++k) magneticEnergies[k][j] = movedMagneticEnergyArray[k];
+            stericEnergies[j] = movedStericEnergyArray;
+            for(int k = 0; k < stericEnergies.size(); ++k) stericEnergies[k][j] = movedStericEnergyArray[k];
+
+
+
         }
 
 

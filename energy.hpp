@@ -51,6 +51,8 @@ class Energy
         
 
         double calcStericEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2);
+        double calcStericEnergy2(Particle const &p1, Particle const &p2);
+
         double calcMagneticEnergy(ParticleForCalc const &p1, ParticleForCalc const &p2,double box_size, double paramaterLambda);
 
         //first: distance
@@ -58,6 +60,8 @@ class Energy
         std::pair<double,int> minimumDistance( Eigen::Vector2d p1, Eigen::Vector2d p2, double box_size);
 
         double calcMagneticEnergyBetweenPortion(Eigen::Vector2d const &p1, Eigen::Vector2d const & p2, double  const &angle1, double const &angle2, double paramaterLambda);
+
+        double calcMagneticEnergyBetweenOtherParticle(Particle const & p1 , Particle const & p2, double paramaterLambda);
 
         double calcMagneticEnergyBetweenMagneticField(Particle const & particle, double xi);
         
