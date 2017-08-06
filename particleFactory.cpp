@@ -25,7 +25,7 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
 
 
 
-Particle ParticleFactory::moveParticle(Particle const& particle)
+ptrParticle ParticleFactory::moveParticle(Particle const& particle)
 {
     std::random_device rand_dev;
     std::mt19937 mt(rand_dev());
@@ -40,7 +40,7 @@ Particle ParticleFactory::moveParticle(Particle const& particle)
     double parAng = particle.particleAngle + difftheta;
     parAng = adjustAngle(parAng);
     double magAng = particle.magnetizationAngle;
-    return Particle(pos,parAng,magAng);
+    return ptrParticle(new (pos,parAng,magAng));
 }
 
 
