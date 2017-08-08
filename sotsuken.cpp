@@ -7,7 +7,11 @@
 #include<math.h>
 #include <memory>
 #include <random>
-#include <array>
+#include <vector>
+#include <numeric>
+#include <chrono>
+#include <stdio.h>
+#include <fstream>
 #include "particle.hpp"
 #include "particleFactory.hpp"
 #include "energy.hpp"
@@ -16,7 +20,7 @@
 using namespace std;
 using namespace Eigen;
 using ptrParticle = unique_ptr<Particle>;
-using Particles = array<ptrParticle>;
+using Particles = vector<ptrParticle>;
 
 /////////////////////////////////
 #include <sys/time.h>
@@ -45,13 +49,13 @@ double minimumPowDistance(Eigen::Vector2d const & p1, Eigen::Vector2d const & p2
 {
     double xdiff = p1.x() - p2.x();
     double ydiff = p1.y() - p2.y();
-    if (fabs(xdiff) < box_size / 2.0)
+    if (fabs(xdiff) > box_size / 2.0)
     {
         if (xdiff > 0) xdiff -= box_size;
         else xdiff += box_size;
     }
 
-    if (fabs(ydiff) < box_size / 2.0)
+    if (fabs(ydiff) > box_size / 2.0)
     {
         if (ydiff > 0) ydiff -= box_size;
         else ydiff += box_size;
@@ -64,10 +68,61 @@ bool isOverlap(Particles const & particles, Particle const & particle, int const
     for( int i = 0; i < particles.size(); ++i )
     {
         if (i==index) continue;
-        if( minimumDistance(particles[i] -> position, particle.position, box_size) < 1 ) return true;
+        if( minimumPowDistance(particles[i] -> position, particle.position, box_size) < 1.0 ) return true;
     }
     return false;
 }
+
+
+void input(int& numberOfParticle, double& box_size, double& delr, double& deltheta, double& magnetCutoff, double& stericEnergyCutOff, double& xi, double& lambdap, int& step, int& outputstep)
+{
+    ifstream ifs("input.data");
+    string str;
+    char tmp[30];
+    
+    getline(ifs,str);
+    sscanf(str.data(),"%s %d",tmp,&numberOfParticle);
+    cout << "numberOfParticle:" << numberOfParticle << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&box_size);
+    cout << "box_size:" << box_size << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&delr);
+    cout << "delr:" <<delr << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&deltheta);
+    cout << "deltheta:" <<deltheta << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&magnetCutoff);
+    cout << "magneticEnergyCutOff:" <<magnetCutoff << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&stericEnergyCutOff);
+    cout << tmp <<":"<<stericEnergyCutOff<< endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&xi);
+    cout << tmp <<":"<<xi << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %lf",tmp,&lambdap);
+    cout << tmp <<":"<< lambdap << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %d",tmp,&step);
+    cout << tmp <<":"<< step << endl;
+
+    getline(ifs,str);
+    sscanf(str.data(),"%s %d",tmp,&outputstep);
+    cout << tmp <<":"<< outputstep << endl;
+
+    cout << endl << endl;
+}
+
 
 
 int main()
@@ -104,48 +159,47 @@ int main()
 	
     Output *op = new Output();
 
-    double box_size = 30;
-    double delr = 0.5;
-    double deltheta = 10;
-    double magnetCutoff = 8;
-    double xi = 0;
-    double lambdap = 7;
+    int numberOfParticle,step,outputstep; 
+    double box_size ,delr, deltheta , magnetCutoff, stericEnergyCutOff,xi, lambdap; 
 
+    input(numberOfParticle,box_size,delr,deltheta,magnetCutoff,stericEnergyCutOff,xi,lambdap,step,outputstep);
+
+    double neighborDistance = magnetCutoff + 5;
+    int neighborUpdateFreq = 5;
 
     ParticleFactory *pf = new ParticleFactory(box_size,delr,deltheta);
 
 
-    auto particles = pf->initializeParticles(64);
+    auto particles = pf->initializeParticles(numberOfParticle);
 
 
-    Energy energyCalc(particles,0,magnetCutoff,box_size,xi,lambdap);
 
-    double totalEnergy = 0;
-    double totalStericEnergy = 0;
-    double magneticEnergyBetweenMagneticField = 0;
-    double magneticEnergyBetweenParticle = 0;
-    array<double,particles.size()> energies;
-    array<array<double,particles.size()>,particles.size()> magneticEnergies;
-    array<array<double,particles.size()>,particles.size()> stericEnergies;
+    Energy energyCalc(stericEnergyCutOff,magnetCutoff,box_size,xi,lambdap);
+
+
+    vector<double> energies(numberOfParticle);
+    MatrixXd magneticEnergies = MatrixXd::Zero(numberOfParticle,numberOfParticle);
+    MatrixXd stericEnergies = MatrixXd::Zero(numberOfParticle,numberOfParticle);
 
     //saisyoni energies toka syokika
-    for( int i = 0; i < particles.size(); ++i)
+    for( int i = 0; i < numberOfParticle; ++i)
     {
-        for (int j = 0; j < particles.size(); ++j)
+        energies[i] = 0.0;
+
+        for (int j = 0; j < numberOfParticle ; ++j)
         {
             if (i==j)
             {
-                magneticEnergies[i][i] = energyCalc.calcMagneticEnergyBetweenMagneticField(*(particles[i]));
-                stericEnergies[i][i] = 0;
-                totalEnergy += magneticEnergies[i][i];
-                magneticEnergyBetweenMagneticField += magneticEnergies[i][i];
+                magneticEnergies(i,i) = energyCalc.calcMagneticEnergyBetweenMagneticField(*(particles[i]));
+                stericEnergies(i,i) = 0;
+                energies[i] += magneticEnergies(i,i);
                 continue;
             }
-            magneticEnergies[i][j] = energyCalc.calcMagneticEnergyBetweenOtherParticle(*(particles[i]),*(particles[j]));
-            stericEnergies[i][j] = energyCalc.calcstericEnergy(*(particles[i]),*(particles[j]));
-            totalEnergy += magneticEnergies[i][j] / 2.0 + stericEnergies[i][j] /2.0;
-            totalStericEnergy += stericEnergies[i][j] / 2.0;
-            magneticEnergyBetweenParticle += magneticEnergies[i][j] / 2.0;
+            magneticEnergies(i,j) = energyCalc.calcMagneticEnergyBetweenOtherParticle(*(particles[i]),*(particles[j]));
+            stericEnergies(i,j) = energyCalc.calcStericEnergy(*(particles[i]),*(particles[j]));
+
+            energies[i] += magneticEnergies(i,j);
+            energies[i] += stericEnergies(i,j);
         }
     }
 
@@ -156,76 +210,98 @@ int main()
     string energyfilename = directoryname + "/energy" +   ".csv";
     op->outputParticles(particlefilename,particles);
     op->outputEnergyInitialize(energyfilename);
-    op->outputEnergy(energyfilename,0,totalEnergy,magneticEnergyBetweenMagneticField, magneticEnergyBetweenParticle, totalStericEnergy);
+    op->outputEnergy(energyfilename,0, energies, magneticEnergies, stericEnergies); 
 
 
     random_device rd;
     mt19937 mt(rd());
     uniform_real_distribution<double> randomprobgenerator(0.0,1.0);
     cout << "ok" << endl;
-    for(int i=1;i<=50000;i++)
+
+
+
+
+    clock_t start,end;
+    double overlapt,energyt;
+
+    for(int i=1;i<=step;i++)
     {
 
-        if( i% 1000 == 0)
+        if( i% outputstep == 0)
         {
+            cout << i << endl;
             particlefilename = directoryname + "/particle" + to_string(i)+".csv";
             op->outputParticles(particlefilename,particles);
-            op->outputEnergy(energyfilename,i,totalEnergy,magneticEnergyBetweenMagneticField, magneticEnergyBetweenParticle, totalStericEnergy);
+            op->outputEnergy(energyfilename, i , energies, magneticEnergies, stericEnergies); 
+        }
+
+        if (i % 100  == 0)
+        {
+            cout << i << endl;
+            cout << "overlapt: " << overlapt << endl;
+            cout << "energyt:  " << energyt << endl;
+            overlapt = 0;
+            energyt = 0;
+
         }
 
 
-        for(int j = 0; j < particles.size(); j++)
+        for(int j = 0; j < numberOfParticle; j++)
         {
-            ptrParticle movedParticle = pf.moveParticle(*(particles[j]));
-            if(isOverlap(particles,tmpParticle,j, box_size)) break;
-            array<double,particles.size()> movedMagneticEnergyArray;
-            array<double,particles.size()> movedStericEnergyArray;
-            for(int k=0; k < particles.size(); k++)
+            vector<double> movedMagneticEnergyArray(numberOfParticle);
+            vector<double> movedStericEnergyArray(numberOfParticle);
+            vector<double> koushinEnergyArray(numberOfParticle);
+
+            ptrParticle movedParticle = pf->moveParticle(*(particles[j]));
+
+
+
+
+
+            if(isOverlap(particles,*movedParticle,j, box_size)) continue;
+
+
+            
+            energyCalc.calcEnergies(movedMagneticEnergyArray,movedStericEnergyArray , *movedParticle , particles , j );
+
+
+            
+            double movedEnergy = 0.0;
+            for(int k = 0; k < numberOfParticle; ++k)
             {
-                if(j == k)
-                {
-                    movedMagneticEnergyArray[j] = energyCalc.calcMagneticEnergyBetweenMagneticField(*movedParticle,xi);
-                    movedStericEnergyArray[j] = 0;
-                    continue;
-                }
-
-                movedMagneticEnergyArray[k] = energyCalc.calcMagneticEnergyBetweenOtherParticle(*movedParticle,*particles[k],lambdap);
-                movedStericEnergyArray[k] = energyCalc.calcStericEnergy(*movedParticle,*particles[k]);
-
+                movedEnergy += movedStericEnergyArray[k] + movedMagneticEnergyArray[k];
             }
-
-            double movedEnergy = std::accumulate(movedMagneticEnergyArray.begin(),movedMagneticEnergyArray.end(), 0) + std::accumulate(movedStericEnergyArray.begin(),movedStericEnergyArray.end(),0);
             
             double diffEnergy = movedEnergy - energies[j];
-            if (diffEnergy < 0) continue;
-            double probab = exp(-diffEnergy);
-            double randprob = randomprobgenerator(mt);
-            if (probab < randprob) continue;
 
-            //koushin
-            array<double,particles.size()> koushinEnergyArray;
-            for(int k=0; k< particles.size(); ++k)
+            if (diffEnergy > 0) 
             {
-                koushinEnergyArray[k] = movedMagneticEnergyArray[k]-magneticEnergies[k][j]; //k,jkannnoyatu
-                koushinEnergyArray[k] += movedStericEnergyArray[k] - stericEnergies[k][j];
+                double probab = exp(-diffEnergy);
+                double randprob = randomprobgenerator(mt);
+                if (probab < randprob) continue;
             }
 
-            totalEnergy += diffEnergy;
+            //koushin
+            particles[j] = move(movedParticle);
 
-            double diffMagneticEnergyBetweenField = movedMagneticEnergyArray[j] - magneticEnergies[j][j];
-            double diffMagneticEnergyBetweenParticle = std::accumulate(movedMagneticEnergyArray.begin(),movedMagneticEnergyArray.end(), 0) - std::accumulate(magneticEnergies[j].begin(),magneticEnergies[j].end(), 0) - diffMagneticEnergyBetweenField; 
-            double diffStericEnergy = std::accumulate(movedStericEnergyArray.begin(),movedStericEnergyArray.end(), 0) - std::accumulate(stericEnergies[j].begin(),stericEnergies[j].end(), 0); 
+            for(int k=0; k< numberOfParticle; ++k)
+            {
+                koushinEnergyArray[k] = movedMagneticEnergyArray[k]-magneticEnergies(j,k); //k,jkannnoyatu
+                koushinEnergyArray[k] += movedStericEnergyArray[k] - stericEnergies(j,k);
+            }
 
-            totalStericEnergy += diffStericEnergy;
-            magneticEnergyBetweenMagneticField += diffMagneticEnergyBetweenField;
-            magneticEnergyBetweenParticle += diffMagneticEnergyBetweenParticle;
+            //energies
+            for ( int k = 0; k < numberOfParticle ; ++k )
+            {
+                energies[k] += koushinEnergyArray[k];
 
-            for(int k=0; k< particles.size(); ++k) energies[k] += koushinEnergyArray[k];
+                magneticEnergies(j,k) =  movedMagneticEnergyArray[k];
+                magneticEnergies(k,j) =  movedMagneticEnergyArray[k];
 
-            magneticEnergies[j] = movedMagneticEnergyArray;
-            for(int k = 0; k < magneticEnergies.size(); ++k) magneticEnergies[k][j] = movedMagneticEnergyArray[k];
-            stericEnergies[j] = movedStericEnergyArray;
-            for(int k = 0; k < stericEnergies.size(); ++k) stericEnergies[k][j] = movedStericEnergyArray[k];
+                stericEnergies(j,k) =  movedStericEnergyArray[k];
+                stericEnergies(k,j) =  movedStericEnergyArray[k];
+            }
+
 
         }
 
@@ -234,3 +310,4 @@ int main()
     delete op;
     return 0;
 }
+

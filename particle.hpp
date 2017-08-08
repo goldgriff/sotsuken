@@ -1,8 +1,10 @@
 #pragma once
 #include<Eigen/Core>
 #include<Eigen/Geometry>
+#include <vector>
 
 using namespace Eigen;
+using namespace std;
 
 
 class Particle

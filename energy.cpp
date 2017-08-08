@@ -13,9 +13,9 @@ using namespace Eigen;
 
 ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
 {
-    double pa = particle -> particleAngle();
-    double ma = particle -> magnetizationAngle();
-    auto pos = particle -> position();
+    double pa = particle -> particleAngle;
+    double ma = particle -> magnetizationAngle;
+    auto pos = particle -> position;
     double angle1 = pa/180.0*PI;
     double angle2 = (pa+120)/180.0*PI;
     double angle3 = (pa+240)/180.0*PI;
@@ -32,7 +32,7 @@ ParticleForCalc::ParticleForCalc(const std::unique_ptr<Particle> &particle)
     positions[3] = pos + addVector1 * 2 ;
     positions[4] = pos + addVector2 * 2 ;
     positions[5] = pos + addVector3 * 2 ;
-    positions[6] = particle -> position();
+    positions[6] = particle -> position;
 }
 
 
@@ -76,11 +76,11 @@ double Energy::calcMagneticEnergyBetweenPortion(Eigen::Vector2d const &p1, Eigen
     double radAngle2 = angle2 / 180.0 * PI;
     Eigen::Vector2d n1(cos(radAngle1),sin(radAngle1));
     Eigen::Vector2d n2(cos(radAngle2),sin(radAngle2));
-    return paramaterLambda / (r*r*r) * (n1.dot(n2)-3*(n1.dot(t))*(n2.dot(t)));
+    return this->paramaterLambda / (r*r*r) * (n1.dot(n2)-3*(n1.dot(t))*(n2.dot(t)));
 }
 
 
-double calcMagneticEnergyBetweenOtherParticle(Particle const & p1, Particle const & p2)
+double Energy::calcMagneticEnergyBetweenOtherParticle(Particle const & p1, Particle const & p2)
 {
     double x1 = p1.position.x();
     double x2 = p2.position.x();
@@ -102,21 +102,25 @@ double calcMagneticEnergyBetweenOtherParticle(Particle const & p1, Particle cons
     }
 
 
-    if(x1 < magneticEnergyCutOff && x2 > box_size - magneticEnergyCutOff)
+    if(x1 < this->magneticEnergyCutOff && x2 > this->box_size - this->magneticEnergyCutOff)
     {
-        x2 -= box_size;
+        x2 -= this->box_size;
     }
 
-    if(y1 < magneticEnergyCutOff && y2 > box_size - magneticEnergyCutOff)
+    if(y1 < this->magneticEnergyCutOff && y2 > this->box_size - this->magneticEnergyCutOff)
     {
-        y2 -= box_size;
+        y2 -= this->box_size;
     }
+
+    //cutof sareru
+    if(pow(x2-x1,2) + pow(y2 - y1, 2) > pow(this->magneticEnergyCutOff, 2)) return 0;
+
 
     Eigen::Vector2d pos1(x1,y1);
     Eigen::Vector2d pos2(x2,y2);
 
-    double angle1 = p1.particleAngle() + p1.magnetizationAngle();
-    double angle2 = p2.particleAngle() + p2.magnetizationAngle();
+    double angle1 = p1.particleAngle + p1.magnetizationAngle;
+    double angle2 = p2.particleAngle + p2.magnetizationAngle;
 
     return calcMagneticEnergyBetweenPortion(pos1,pos2,angle1,angle2);
 
@@ -125,7 +129,27 @@ double calcMagneticEnergyBetweenOtherParticle(Particle const & p1, Particle cons
 
 double Energy::calcMagneticEnergyBetweenMagneticField(Particle const & particle)
 {
-    double radAngle = (particle.particleAngle() + particle.magnetizationAngle()) / 180.0 * PI;
+    double radAngle = (particle.particleAngle + particle.magnetizationAngle) / 180.0 * PI;
     //7tubunn
-    return -sin(radAngle) * xi * 7;
+    return -sin(radAngle) * this->xi;
+}
+
+
+
+
+double Energy::calcEnergies( std::vector < double > &magneticEnergies, std::vector< double > &stericEnergies ,Particle  & movedParticle ,Particles  & particles, int &index )
+{
+    for(int k=0; k < magneticEnergies.size(); k++)
+    {
+        if(index == k)
+        {
+            magneticEnergies[k] =  calcMagneticEnergyBetweenMagneticField(movedParticle);
+            stericEnergies[k] = 0;
+            continue;
+        }
+
+        magneticEnergies[k] =  calcMagneticEnergyBetweenOtherParticle(movedParticle,*particles[k]);
+        stericEnergies[k] =  calcStericEnergy(movedParticle,*particles[k]);
+
+    }
 }

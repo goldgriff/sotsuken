@@ -8,7 +8,8 @@ class Particle;
 class Energy;
 
 using Particles = std::vector<std::unique_ptr<Particle>>;
-
+using namespace std;
+using namespace Eigen;
 
 class Output
 {
@@ -16,7 +17,7 @@ class Output
         int outputCount = 0;
     public:
         void outputParticles(std::string const & filename, Particles const & particles);
-        void outputEnergy(std::string const & filename,int const& count, double const & energy, double const & magneticEnergyBetweenMagneticField, double const & magneticEnergyBetweenParticle, double const & stericEnergy);
+        void outputEnergy(std::string const & filename,int const& count, vector<double> const& energies, MatrixXd const&  magneticEnergies, MatrixXd const& stericEnergies); 
 
         void outputEnergyInitialize(std::string const & filename);
 

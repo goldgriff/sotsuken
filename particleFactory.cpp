@@ -4,6 +4,40 @@
 ParticleFactory::ParticleFactory(double box_size, double delr, double deltheta) : _box_size(box_size), _delr(delr), _deltheta(deltheta) {
 }
 
+
+
+double ParticleFactory::minimumPowDistance(Eigen::Vector2d const & p1, Eigen::Vector2d const & p2)
+{
+    double box_size = _box_size;
+    double xdiff = p1.x() - p2.x();
+    double ydiff = p1.y() - p2.y();
+    if (fabs(xdiff) > box_size / 2.0)
+    {
+        if (xdiff > 0) xdiff -= box_size;
+        else xdiff += box_size;
+    }
+
+    if (fabs(ydiff) > box_size / 2.0)
+    {
+        if (ydiff > 0) ydiff -= box_size;
+        else ydiff += box_size;
+    }
+    return xdiff * xdiff + ydiff * ydiff;
+}
+
+
+bool ParticleFactory::isOverlap(Vector2d const & pos, vector<Vector2d> const & positions)
+{
+    for( int i = 0; i < positions.size(); ++i )
+    {
+        if( minimumPowDistance(positions[i] , pos ) < 4 ) return true;
+    }
+    return false;
+}
+
+
+
+
 Particles ParticleFactory::initializeParticles(int particleNumber)
 {
     std::random_device rand_dev;
@@ -12,13 +46,22 @@ Particles ParticleFactory::initializeParticles(int particleNumber)
     std::uniform_real_distribution<double> angleMake(0.0,360.0);
 
     Particles particles(particleNumber);
+    vector<Vector2d> positions;
 
     for(auto &ref: particles)
     {
-        Vector2d pos(posMake(mt),posMake(mt));
-        double parAng = angleMake(mt);
-        double magAng = angleMake(mt);
-        ref = unique_ptr<Particle(pos,parAng,magAng)>(new Particle(pos,parAng,magAng));
+        while (1)
+        {
+            Vector2d pos(posMake(mt),posMake(mt));
+            double parAng = angleMake(mt);
+            double magAng = angleMake(mt);
+            if(!isOverlap(pos,positions))
+            {
+                positions.push_back(pos);
+                ref = std::unique_ptr<Particle>(new Particle(pos,parAng,magAng));
+                break;
+            }
+        }
     }
     return particles;
 }
@@ -40,7 +83,7 @@ ptrParticle ParticleFactory::moveParticle(Particle const& particle)
     double parAng = particle.particleAngle + difftheta;
     parAng = adjustAngle(parAng);
     double magAng = particle.magnetizationAngle;
-    return ptrParticle(new (pos,parAng,magAng));
+    return ptrParticle(new Particle(pos,parAng,magAng));
 }
 
 

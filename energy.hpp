@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
 #include <array>
+#include <vector>
+#include <math.h>
 #include <Eigen/Core>
 
 class Particle;
 
-using Particles = std::array<std::unique_ptr<Particle>>;
+using Particles = std::vector<std::unique_ptr<Particle>>;
 using Positions = std::array<Eigen::Vector2d,7>;
 
 class ParticleForCalc
@@ -55,4 +57,7 @@ class Energy
 
         double calcMagneticEnergyBetweenMagneticField(Particle const & particle);
         
+        double calcMagneticEnergyBetweenPortion(Eigen::Vector2d const &p1, Eigen::Vector2d const & p2, double  const &angle1, double const &angle2);
+
+        double calcEnergies( std::vector < double > &magneticEnergies, std::vector< double > &stericEnergies ,Particle & movedParticle, Particles  & particles, int  & index );
 };
