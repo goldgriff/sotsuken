@@ -48,8 +48,8 @@ void Output::outputEnergy(std::string const & filename,int const& count, vector<
     }
     cout << endl << endl;
 
-    cout << "magneticEnergies" << endl << magneticEnergies << endl << endl;
-    cout << "stericEnergies" << endl << stericEnergies << endl << endl;
+    // cout << "magneticEnergies" << endl << magneticEnergies << endl << endl;
+    // cout << "stericEnergies" << endl << stericEnergies << endl << endl;
 }
 
 void Output::outputEnergyInitialize(std::string const & filename)

@@ -235,15 +235,15 @@ int main()
             op->outputEnergy(energyfilename, i , energies, magneticEnergies, stericEnergies); 
         }
 
-        if (i % 100  == 0)
-        {
-            cout << i << endl;
-            cout << "overlapt: " << overlapt << endl;
-            cout << "energyt:  " << energyt << endl;
-            overlapt = 0;
-            energyt = 0;
-
-        }
+        // if (i % 100  == 0)
+        // {
+        //     cout << i << endl;
+        //     cout << "overlapt: " << overlapt << endl;
+        //     cout << "energyt:  " << energyt << endl;
+        //     overlapt = 0;
+        //     energyt = 0;
+        //
+        // }
 
 
         for(int j = 0; j < numberOfParticle; j++)
@@ -293,7 +293,9 @@ int main()
             //energies
             for ( int k = 0; k < numberOfParticle ; ++k )
             {
-                energies[k] += koushinEnergyArray[k];
+                if(j==k)energies[k] += diffEnergy;  
+                else energies[k] += koushinEnergyArray[k];
+
 
                 magneticEnergies(j,k) =  movedMagneticEnergyArray[k];
                 magneticEnergies(k,j) =  movedMagneticEnergyArray[k];
